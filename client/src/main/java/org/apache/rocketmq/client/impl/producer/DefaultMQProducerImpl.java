@@ -1111,22 +1111,33 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         } catch (Exception e) {
             throw new MQClientException("send message Exception", e);
         }
-
+        String transactionId = msg.getProperty(MessageConst.PROPERTY_UNIQ_CLIENT_MESSAGE_ID_KEYIDX);
+        if (null != transactionId && !"".equals(transactionId)) {
+            msg.setTransactionId(transactionId);
+            sendResult.setTransactionId(transactionId);
+        }
         LocalTransactionState localTransactionState = LocalTransactionState.UNKNOW;
+        TransactionSendResult transactionSendResult = new TransactionSendResult();
+        transactionSendResult.setSendStatus(sendResult.getSendStatus());
+        transactionSendResult.setMessageQueue(sendResult.getMessageQueue());
+        transactionSendResult.setMsgId(sendResult.getMsgId());
+        transactionSendResult.setQueueOffset(sendResult.getQueueOffset());
+        transactionSendResult.setTransactionId(sendResult.getTransactionId());
+        transactionSendResult.setLocalTransactionState(localTransactionState);
+        return transactionSendResult;
+    }
+    public TransactionSendResult endTransaction(final SendResult sendResult,final LocalTransactionState localTransactionState, final Message msg) throws MQClientException {
         Throwable localException = null;
+        LocalTransactionState transactionState = null;
         switch (sendResult.getSendStatus()) {
             case SEND_OK: {
                 try {
                     if (sendResult.getTransactionId() != null) {
                         msg.putUserProperty("__transactionId__", sendResult.getTransactionId());
                     }
-                    String transactionId = msg.getProperty(MessageConst.PROPERTY_UNIQ_CLIENT_MESSAGE_ID_KEYIDX);
-                    if (null != transactionId && !"".equals(transactionId)) {
-                        msg.setTransactionId(transactionId);
-                    }
-                    localTransactionState = tranExecuter.executeLocalTransaction(msg, arg);
+                    transactionState = localTransactionState;
                     if (null == localTransactionState) {
-                        localTransactionState = LocalTransactionState.UNKNOW;
+                        transactionState = LocalTransactionState.UNKNOW;
                     }
 
                     if (localTransactionState != LocalTransactionState.COMMIT_MESSAGE) {
@@ -1143,18 +1154,18 @@ public class DefaultMQProducerImpl implements MQProducerInner {
             case FLUSH_DISK_TIMEOUT:
             case FLUSH_SLAVE_TIMEOUT:
             case SLAVE_NOT_AVAILABLE:
-                localTransactionState = LocalTransactionState.ROLLBACK_MESSAGE;
+                transactionState = LocalTransactionState.ROLLBACK_MESSAGE;
                 break;
             default:
                 break;
         }
 
         try {
-            this.endTransaction(sendResult, localTransactionState, localException);
+            this.endTransaction(sendResult, transactionState, localException);
         } catch (Exception e) {
             log.warn("local transaction execute " + localTransactionState + ", but end broker transaction failed", e);
         }
-
+        
         TransactionSendResult transactionSendResult = new TransactionSendResult();
         transactionSendResult.setSendStatus(sendResult.getSendStatus());
         transactionSendResult.setMessageQueue(sendResult.getMessageQueue());
@@ -1163,8 +1174,8 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         transactionSendResult.setTransactionId(sendResult.getTransactionId());
         transactionSendResult.setLocalTransactionState(localTransactionState);
         return transactionSendResult;
-    }
 
+    }
     /**
      * DEFAULT SYNC -------------------------------------------------------
      */

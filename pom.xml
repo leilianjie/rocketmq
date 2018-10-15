@@ -29,7 +29,7 @@
     <inceptionYear>2012</inceptionYear>
     <groupId>org.apache.rocketmq</groupId>
     <artifactId>rocketmq-all</artifactId>
-    <version>4.3.0</version>
+    <version>4.3.0-r</version>
     <packaging>pom</packaging>
     <name>Apache RocketMQ ${project.version}</name>
     <url>http://rocketmq.apache.org/</url>
@@ -91,6 +91,18 @@
         <system>jira</system>
         <url>https://issues.apache.org/jira/browse/RocketMQ</url>
     </issueManagement>
+	<distributionManagement>
+			<repository>
+				<id>ifbp-Releases</id>
+				<name>fbp-Releases</name>
+				<url>http://10.10.2.45:8081/nexus/content/repositories/ifbp-Releases/</url>
+			</repository>
+			<snapshotRepository>
+				<id>ifbp-Snapshots</id>
+				<name>ifbp-Snapshots</name>
+				<url>http://10.10.2.45:8081/nexus/content/repositories/ifbp-Snapshots/</url>
+			</snapshotRepository>
+	   </distributionManagement>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -207,7 +219,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
+           <!--  <plugin>
                 <artifactId>maven-help-plugin</artifactId>
                 <version>2.2</version>
                 <executions>
@@ -222,7 +234,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin> -->
             <plugin>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>2.17</version>

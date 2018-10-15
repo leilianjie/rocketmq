@@ -16,11 +16,11 @@
  */
 package org.apache.rocketmq.client.producer;
 
+import java.util.concurrent.ExecutorService;
+
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.remoting.RPCHook;
-
-import java.util.concurrent.ExecutorService;
 
 public class TransactionMQProducer extends DefaultMQProducer {
     private TransactionListener transactionListener;
@@ -57,6 +57,11 @@ public class TransactionMQProducer extends DefaultMQProducer {
         }
 
         return this.defaultMQProducerImpl.sendMessageInTransaction(msg, transactionListener, arg);
+    }
+
+    @Override
+    public TransactionSendResult endTransaction(final SendResult sendResult,final LocalTransactionState localTransactionState, final Message msg) throws MQClientException {
+        return this.defaultMQProducerImpl.endTransaction(sendResult, localTransactionState, msg);
     }
 
     public TransactionListener getTransactionListener() {

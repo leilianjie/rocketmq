@@ -762,4 +762,8 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
     public void setRetryTimesWhenSendAsyncFailed(final int retryTimesWhenSendAsyncFailed) {
         this.retryTimesWhenSendAsyncFailed = retryTimesWhenSendAsyncFailed;
     }
+
+    public TransactionSendResult endTransaction(final SendResult sendResult,final LocalTransactionState localTransactionState, final Message msg) throws MQClientException {
+        throw new RuntimeException("endTransaction not implement, please use TransactionMQProducer class");
+    }
 }
