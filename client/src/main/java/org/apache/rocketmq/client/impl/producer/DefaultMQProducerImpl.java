@@ -1111,18 +1111,22 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         } catch (Exception e) {
             throw new MQClientException("send message Exception", e);
         }
-        String transactionId = msg.getProperty(MessageConst.PROPERTY_UNIQ_CLIENT_MESSAGE_ID_KEYIDX);
-        if (null != transactionId && !"".equals(transactionId)) {
-            msg.setTransactionId(transactionId);
-            sendResult.setTransactionId(transactionId);
+        if(SendStatus.SEND_OK == sendResult.getSendStatus()){
+        	String transactionId = msg.getProperty(MessageConst.PROPERTY_UNIQ_CLIENT_MESSAGE_ID_KEYIDX);
+        	if (null != transactionId && !"".equals(transactionId)) {
+        		msg.setTransactionId(transactionId);
+        		sendResult.setTransactionId(transactionId);
+        	}
         }
         LocalTransactionState localTransactionState = LocalTransactionState.UNKNOW;
         TransactionSendResult transactionSendResult = new TransactionSendResult();
         transactionSendResult.setSendStatus(sendResult.getSendStatus());
         transactionSendResult.setMessageQueue(sendResult.getMessageQueue());
+        transactionSendResult.setOffsetMsgId(sendResult.getOffsetMsgId());
         transactionSendResult.setMsgId(sendResult.getMsgId());
         transactionSendResult.setQueueOffset(sendResult.getQueueOffset());
         transactionSendResult.setTransactionId(sendResult.getTransactionId());
+        transactionSendResult.setTraceOn(sendResult.isTraceOn());
         transactionSendResult.setLocalTransactionState(localTransactionState);
         return transactionSendResult;
     }
